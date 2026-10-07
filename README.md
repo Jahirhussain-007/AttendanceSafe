@@ -1,2 +1,1 @@
-# AttendanceSafe
-Smart attendance calculator that tracks present and leave days, calculates attendance percentage, and tells you how many leaves you can safely take without falling below the required attendance.
+# [![Netlify Status](https://api.netlify.com/api/v1/badges/d551f22c-887f-4978-914e-e385613d0f0b/deploy-status)](https://app.netlify.com/projects/attendanceprotec/deploys)
