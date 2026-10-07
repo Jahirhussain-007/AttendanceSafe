@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AttendanceSafe</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#1b2233;--mu:#667089;--bd:#e3e7f0;--pr:#4f46e5;--ok:#16a34a;--wa:#d97706;--da:#dc2626;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1320;--card:#181d2e;--tx:#eef1f8;--mu:#9aa4bd;--bd:#2a3148;--pr:#818cf8;--ok:#4ade80;--wa:#fbbf24;--da:#f87171}}
+:root[data-theme="dark"]{--bg:#0f1320;--card:#181d2e;--tx:#eef1f8;--mu:#9aa4bd;--bd:#2a3148;--pr:#818cf8;--ok:#4ade80;--wa:#fbbf24;--da:#f87171}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:640px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:1.4rem;margin:0}.tag{color:var(--mu);font-size:.9rem;margin:0}
+h2{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px;margin-bottom:14px}
+label{display:block;font-size:.85rem;color:var(--mu);margin:10px 0 4px}
+input{width:100%;min-height:48px;padding:10px 12px;font-size:1rem;border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{min-height:48px;border:0;border-radius:12px;background:var(--pr);color:#fff;font-size:1rem;font-weight:600;padding:0 18px;cursor:pointer}
+button.s{background:transparent;color:var(--tx);border:1px solid var(--bd);min-height:44px}
+.full{width:100%;margin-top:14px}
+.err{color:var(--da);font-size:.9rem;margin-top:8px}
+.ring{position:relative;width:170px;height:170px;margin:4px auto}
+.ring svg{transform:rotate(-90deg)}.ring .n{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:var(--tx)}
+.ring small{font-size:.72rem;color:var(--mu);font-weight:400}
+.badge{display:inline-block;font-weight:700;padding:4px 14px;border-radius:99px;border:1.5px solid currentColor}
+.ok{color:var(--ok)}.wa{color:var(--wa)}.da{color:var(--da)}
+.c{text-align:center}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;text-align:center}
+.stats b{display:block;font-size:1rem}.stats span{font-size:.72rem;color:var(--mu)}
+.big{font-size:2rem;font-weight:700;line-height:1.2}.mu{color:var(--mu);font-size:.92rem;margin:4px 0 0}
+details{font-size:.9rem;color:var(--mu)}summary{cursor:pointer;margin-bottom:6px}
+.hide{display:none}.row{display:flex;gap:10px;margin-top:12px}.row button{flex:1}
+</style>
+</head>
+<body>
+<div class="w">
+<header><div><h1>🎓 AttendanceSafe</h1><p class="tag">Know your attendance. Plan your leave.</p></div><button class="s" id="th" aria-label="Toggle theme">🌓</button></header>
+
+<form class="card" id="f" novalidate>
+<h2>Attendance Details</h2>
+<div class="g">
+<div><label for="F">Full course hours</label><input id="F" inputmode="decimal" placeholder="450"></div>
+<div><label for="R">Required attendance %</label><input id="R" inputmode="decimal" value="75"></div>
+<div><label for="P">Present hours so far</label><input id="P" inputmode="decimal" placeholder="250"></div>
+<div><label for="A">Absent hours so far</label><input id="A" inputmode="decimal" placeholder="50"></div>
+</div>
+<div class="err" id="e" role="alert"></div>
+<button class="full" type="submit">CALCULATE</button>
+</form>
+
+<div id="d" class="hide">
+<div class="card c"><h2>Current Attendance</h2>
+<div class="ring" id="rg"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="72" fill="none" stroke="var(--bd)" stroke-width="14"/><circle id="arc" cx="85" cy="85" r="72" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-dasharray="452.4" stroke-dashoffset="452.4"/></svg><div class="n"><span id="pc"></span><small id="rq"></small></div></div>
+<span class="badge" id="st"></span><p class="mu" id="sm"></p>
+<div class="stats"><div><b id="sp"></b><span>Present</span></div><div><b id="sa"></b><span>Absent</span></div><div><b id="sc"></b><span>Completed</span></div><div><b id="sf"></b><span>Future</span></div></div>
+<p class="mu" id="fl"></p></div>
+
+<div class="card"><h2>Safe Leave Remaining</h2><div class="big" id="sl"></div><p class="mu" id="sld"></p></div>
+<div class="card"><h2>Minimum Present Required</h2><div class="big" id="mp"></div><p class="mu" id="mpd"></p></div>
+<div class="card"><h2>Maximum Total Absence</h2><div class="big" id="ma"></div><p class="mu" id="mad"></p></div>
+
+<div class="card"><h2>Can I take leave?</h2>
+<label for="L">How many hours do you want to take leave?</label><input id="L" inputmode="decimal" placeholder="6">
+<div class="row"><button type="button" id="ck">CHECK</button><button type="button" class="s" id="rl">RECORD LEAVE</button></div>
+<p id="lr" style="margin:12px 0 0;font-weight:600;white-space:pre-line"></p></div>
+
+<div class="card hide" id="rcc"><h2>Recovery</h2><div id="rc"></div></div>
+<div class="card"><h2>Final Attendance Projection</h2><p class="mu" style="margin:0" id="pj1"></p><div class="big" id="pj2"></div><p class="mu" id="pj3"></p></div>
+
+<div class="card"><details><summary>How is this calculated?</summary>
+<p><b>Current attendance</b> = Present ÷ (Present + Absent) × 100. The full course hours are never used for this.</p>
+<p><b>Minimum present</b> = Full course × Required%. <b>Maximum absence</b> = Full course − Minimum present. <b>Safe leave</b> = Maximum absence − Absent so far.</p>
+<p><b>Recovery</b> (when below the requirement): smallest whole A with (P + A) ÷ (T + A) ≥ R, where T = completed hours.</p>
+<p><b>Projection</b> = (Present + Future hours) ÷ Full course × 100.</p></details></div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id),KEY="attendancesafe:v2",EPS=1e-9,WARN=5;
+// ---- calculation logic ----
+const completed=(p,a)=>p+a;
+const currentAttendance=(p,a)=>p+a>0?p/(p+a)*100:0;
+const futureHours=(F,p,a)=>Math.max(0,F-(p+a));
+const minPresent=(F,r)=>F*r/100;
+const maxAbsence=(F,r)=>F-minPresent(F,r);
+const safeLeave=(F,a,r)=>maxAbsence(F,r)-a;
+const afterLeave=(p,a,l)=>currentAttendance(p,a+l);
+const recoveryHours=(p,a,r)=>{const t=p+a,R=r/100;if(p>=R*t-EPS)return 0;if(R>=1)return null;return Math.ceil((R*t-p)/(1-R)-EPS)};
+const finalIfAll=(F,p,a)=>(p+futureHours(F,p,a))/F*100;
+const canRecover=(F,p,a,r)=>finalIfAll(F,p,a)>=r-EPS;
+const status=(p,a,r)=>{const c=currentAttendance(p,a);return c<r-EPS?"danger":c<r+WARN?"warning":"safe"};
+// ---- UI ----
+const h=v=>String(Math.round(v*100)/100),f2=v=>v.toFixed(2);
+const CLS={safe:"ok",warning:"wa",danger:"da"},LBL={safe:"🟢 SAFE",warning:"🟡 WARNING",danger:"🔴 DANGER"};
+const MSG={safe:"Your attendance is currently safe.",warning:"Your attendance is close to the minimum requirement. Avoid unnecessary leave.",danger:"Your attendance is below the required level."};
+let S=null;
+const num=id=>{const s=$(id).value.trim();return /^\d*\.?\d+$|^\d+\.$/.test(s)&&Number(s)<=1e9?Number(s):null};
+function save(){try{localStorage.setItem(KEY,JSON.stringify({F:$("F").value,P:$("P").value,A:$("A").value,R:$("R").value}))}catch(x){}}
+function validate(){
+ const F=num("F"),P=num("P"),A=num("A"),R=num("R");
+ if(F===null||F<=0)return"Full course hours must be greater than 0.";
+ if(P===null)return"Present hours must be 0 or more.";
+ if(A===null)return"Absent hours must be 0 or more.";
+ if(R===null||R<1||R>100)return"Required attendance must be between 1% and 100%.";
+ if(P+A>F+EPS)return"Completed hours cannot exceed total course hours.";
+ S={F,P,A,R};return"";
+}
+function render(){
+ const{F,P,A,R}=S,cur=currentAttendance(P,A),st=status(P,A,R),c=CLS[st],fut=futureHours(F,P,A),sl=safeLeave(F,A,R),mp=minPresent(F,R),ma=maxAbsence(F,R);
+ $("d").classList.remove("hide");
+ $("pc").textContent=f2(cur)+"%";$("rq").textContent="required "+h(R)+"%";
+ $("rg").className="ring "+c;$("arc").style.strokeDashoffset=452.4*(1-Math.min(cur,100)/100);
+ $("st").textContent=LBL[st];$("st").className="badge "+c;$("sm").textContent=MSG[st];
+ $("sp").textContent=h(P)+" h";$("sa").textContent=h(A)+" h";$("sc").textContent=h(P+A)+" h";$("sf").textContent=h(fut)+" h";
+ $("fl").textContent=h(fut)+" hours remaining of the "+h(F)+"-hour course";
+ const e=$("sl");
+ if(sl<-EPS){e.textContent="Recovery needed";e.className="big da";$("sld").textContent="Attendance recovery is required.";}
+ else if(sl<=EPS){e.textContent="0 hours";e.className="big wa";$("sld").textContent="No more safe leave available.";}
+ else{e.textContent=h(sl)+" hours";e.className="big ok";$("sld").textContent="You can take up to "+h(sl)+" more hours of leave while still meeting the required "+h(R)+"% attendance by the end of the course.";}
+ $("mp").textContent=h(mp)+" hours";$("mpd").textContent="By the end of the "+h(F)+"-hour course, you need at least "+h(mp)+" hours present.";
+ $("ma").textContent=h(ma)+" hours";$("mad").textContent="You have already used "+h(A)+" hours.";
+ const rec=recoveryHours(P,A,R);$("rcc").classList.toggle("hide",st!=="danger");
+ if(st==="danger")$("rc").innerHTML=rec===null?'<p class="da" style="margin:0">Recovery is not possible at 100% once hours are missed.</p>':'<p class="da" style="margin:0 0 4px">Your current attendance is below '+h(R)+'%.</p><div class="big da">'+rec+' hour'+(rec===1?"":"s")+'</div><p class="mu">You need to attend approximately '+rec+' consecutive hours without absence to reach '+h(R)+'%. Avoid additional leave until your attendance recovers.</p>';
+ const fin=finalIfAll(F,P,A);
+ $("pj1").textContent="If you attend all remaining "+h(fut)+" hours:";$("pj2").textContent=f2(fin)+"%";
+ $("pj3").textContent=canRecover(F,P,A,R)?(st==="danger"?"With the remaining "+h(fut)+" hours, you can recover to the required attendance if you attend them consistently.":"You can still meet the required attendance by the end of the course."):"Even if you attend every remaining hour, reaching the required percentage is not possible.";
+}
+function calc(){const m=validate();$("e").textContent=m;if(m){$("d").classList.add("hide");return false}save();render();$("lr").textContent="";return true}
+$("f").addEventListener("submit",e=>{e.preventDefault();if(calc())$("d").scrollIntoView({behavior:"smooth"})});
+$("ck").onclick=()=>{
+ const l=num("L"),o=$("lr");if(!l){o.textContent="Enter a number of hours greater than 0.";o.className="";return}
+ const{F,P,A,R}=S,ok=A+l<=maxAbsence(F,R)+EPS,after=afterLeave(P,A,l);
+ o.className=ok?"ok":"da";
+ o.textContent=ok?"🟢 SAFE\nAfter taking "+h(l)+" hours leave: "+f2(after)+"%\nSafe leave left: "+h(safeLeave(F,A+l,R))+" hours":"🔴 NOT SAFE\nTaking this leave would exceed your safe leave limit.\nAttendance would be "+f2(after)+"%.";
+};
+$("rl").onclick=()=>{const l=num("L");if(!l)return;
+ if(S.P+S.A+l>S.F+EPS){$("lr").className="da";$("lr").textContent="Completed hours cannot exceed total course hours.";return}
+ $("A").value=h(S.A+l);$("L").value="";calc()};
+$("th").onclick=()=>{const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue("--bg").trim()==="#0f1320";r.dataset.theme=dark?"light":"dark";try{localStorage.setItem(KEY+":theme",r.dataset.theme)}catch(x){}};
+try{const th=localStorage.getItem(KEY+":theme");if(th)document.documentElement.dataset.theme=th;
+ const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s){["F","P","A","R"].forEach(k=>$(k).value=s[k]||(k==="R"?"75":""));calc()}}catch(x){}
+</script>
+</body>
+</html>
